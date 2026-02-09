@@ -2,8 +2,6 @@
 
 Sistema para gerenciar motoristas, veículos e viagens com Laravel + React.
 
-## 🚀 Como Rodar
-
 ### Backend
 ```bash
 composer install
