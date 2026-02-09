@@ -23,12 +23,6 @@ App: http://localhost:5173
 
 ## 🗄️ Banco de Dados
 
-**PostgreSQL (Docker)**
-- Host: localhost:5432
-- Database: entrevista
-- User: postgres
-- Password: postgres
-
 **Comandos úteis:**
 ```bash
 docker-compose logs postgres          # Ver logs
