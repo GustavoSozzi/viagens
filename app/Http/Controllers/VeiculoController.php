@@ -1,0 +1,104 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Requests\StoreVeiculoRequest;
+use App\Http\Requests\UpdateVeiculoRequest;
+use App\Http\Resources\VeiculoResource;
+use App\Models\Veiculos;
+use Exception;
+use Illuminate\Http\Request;
+
+class VeiculoController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+
+    public function index(Request $request)
+    {
+        $currentPage = $request->get('current_page') ?? 1;
+        $regsPerPage = 3;
+
+        $skip = ($currentPage - 1) * $regsPerPage; // 1 = 0 -- 2 = 3
+
+        $veiculos = Veiculos::skip($skip)->take($regsPerPage)->orderByDesc('id')->get();
+
+        return VeiculoResource::collection($veiculos);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+
+    public function store(StoreVeiculoRequest $request)
+    {
+        $data = $request->validated();
+
+        try{
+            $veiculo = Veiculos::create($data);
+
+            return (new VeiculoResource($veiculo))
+                ->response()
+                ->setStatusCode(201);
+        } catch(\Exception $ex){
+            return response()->json([
+                'message' => 'Falha ao inserir veiculo',
+                'error' => $ex->getMessage()
+            ], 400);
+        }
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        try{
+            $motorista = Veiculos::findOrFail($id);
+            return new VeiculoResource($motorista);
+        } catch(\Exception $ex){
+            return response()->json([
+                'message' => 'Falha ao buscar veiculo'
+            ], 404);
+        }
+    }
+
+     /**
+     * Update the specified resource in storage.
+     */
+    public function update(UpdateVeiculoRequest $request, string $id)
+    {
+        $data = $request->validated();
+
+        try{
+            $veiculo = Veiculos::findOrFail($id);
+            $veiculo->update($data);
+
+            return response()->json($veiculo, 200);
+        } catch(\Exception $ex){
+            return response()->json([
+                'message' => 'Falha ao alterar veiculo'
+            ], 400);
+        }
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        try{
+            $removed =  Veiculos::destroy($id);
+            if (!$removed){
+                throw new Exception();
+            }
+
+            return response()->json(null, 204);
+        } catch(\Exception){
+            return response()->json([
+                'message' => 'Falha ao remover veiculo'
+            ], 400);
+        }
+    }
+}
