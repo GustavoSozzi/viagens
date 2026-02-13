@@ -5,9 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Viagens extends Model
 {
+    use SoftDeletes;
+
     protected $fillable = [
         'veiculo_id',
         'km_inicial',
@@ -40,6 +43,7 @@ class Viagens extends Model
     public function motoristas(): BelongsToMany
     {
         return $this->belongsToMany(Motoristas::class, 'motorista_viagem', 'viagem_id', 'motorista_id')
-            ->withTimestamps();
+            ->withTimestamps()
+            ->withTrashed();
     }
 }

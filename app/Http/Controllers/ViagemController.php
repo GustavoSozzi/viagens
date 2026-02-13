@@ -85,7 +85,7 @@ class ViagemController extends Controller
 
         try {
             $viagem = Viagens::findOrFail($id);
-            
+
             $viagem->update([
                 'veiculo_id' => $data['veiculo_id'],
                 'km_inicial' => $data['km_inicial'],
@@ -94,10 +94,8 @@ class ViagemController extends Controller
                 'data_hora_final' => $data['data_hora_final'] ?? null,
             ]);
 
-            // Sincronizar motoristas (remove os antigos e adiciona os novos)
             $viagem->motoristas()->sync($data['motoristas']);
 
-            // Carregar relacionamentos para retornar
             $viagem->load(['veiculo', 'motoristas']);
 
             return new ViagemResource($viagem);

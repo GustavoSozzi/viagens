@@ -18,11 +18,11 @@ class VeiculoController extends Controller
     public function index(Request $request)
     {
         $currentPage = $request->get('current_page') ?? 1;
-        $regsPerPage = 3;
+        $regsPerPage = 10;
 
         $skip = ($currentPage - 1) * $regsPerPage; // 1 = 0 -- 2 = 3
 
-        $veiculos = Veiculos::skip($skip)->take($regsPerPage)->orderByDesc('id')->get();
+        $veiculos = Veiculos::withTrashed()->skip($skip)->take($regsPerPage)->orderByDesc('id')->get();
 
         return VeiculoResource::collection($veiculos);
     }
@@ -36,9 +36,9 @@ class VeiculoController extends Controller
         $data = $request->validated();
 
         try{
-            $veiculo = Veiculos::create($data);
+            $veiculos = Veiculos::create($data);
 
-            return (new VeiculoResource($veiculo))
+            return (new VeiculoResource($veiculos))
                 ->response()
                 ->setStatusCode(201);
         } catch(\Exception $ex){

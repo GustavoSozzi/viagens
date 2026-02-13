@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
+import CustomConfirm from '../components/Modals/CustomConfirm.jsx';
 import api from '../services/api';
 
 function Veiculos() {
   const [veiculos, setVeiculos] = useState([]);
+  const [deleteId, setDeleteId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [editingForm, setEditingForm] = useState(false);
   const [formData, setFormData] = useState({
     modelo: '',
     ano: '',
@@ -29,6 +32,15 @@ function Veiculos() {
       setLoading(false);
     }
   };
+
+  const hideForm = () => {
+      if (showForm) {
+        resetForm();
+      } else {
+        setShowForm(true);
+        setEditingForm(true);
+      }
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -59,22 +71,25 @@ function Veiculos() {
     setShowForm(true);
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Tem certeza que deseja excluir este veículo?')) {
+  const handleDelete = async () => {
+      if (!deleteId) console.log("error");
+
       try {
-        await api.delete(`/veiculos/${id}`);
-        fetchVeiculos();
+          await api.delete(`/veiculos/${deleteId}`);
+          setVeiculos(veiculos.filter(v => v.id !== deleteId));
+          setDeleteId(null);
       } catch (error) {
-        console.error('Erro ao excluir veículo:', error);
-        alert('Erro ao excluir veículo');
+          console.error('Erro ao excluir veiculo:', error);
+          alert('Erro ao excluir veiculo');
+          setDeleteId(null);
       }
-    }
   };
 
   const resetForm = () => {
     setFormData({ modelo: '', ano: '', data_aquisicao: '', kms_rodados: '', renavam: '', placa: '' });
     setEditingId(null);
     setShowForm(false);
+    setEditingForm(false);
   };
 
   if (loading) return <div className="loading">Carregando...</div>;
@@ -83,7 +98,7 @@ function Veiculos() {
     <div className="page">
       <div className="page-header">
         <h1>🚗 Veículos</h1>
-        <button onClick={() => setShowForm(!showForm)} className="btn-primary">
+        <button onClick={() => hideForm()} className="btn-primary">
           {showForm ? 'Cancelar' : '+ Novo Veículo'}
         </button>
       </div>
@@ -158,39 +173,50 @@ function Veiculos() {
         </form>
       )}
 
-      <div className="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Modelo</th>
-              <th>Ano</th>
-              <th>Placa</th>
-              <th>Renavam</th>
-              <th>KMs Rodados</th>
-              <th>Data Aquisição</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {veiculos.map((veiculo) => (
-              <tr key={veiculo.id}>
-                <td>{veiculo.id}</td>
-                <td>{veiculo.modelo}</td>
-                <td>{veiculo.ano}</td>
-                <td>{veiculo.placa}</td>
-                <td>{veiculo.renavam}</td>
-                <td>{veiculo.kms_rodados.toLocaleString('pt-BR')}</td>
-                <td>{new Date(veiculo.data_aquisicao).toLocaleDateString('pt-BR')}</td>
-                <td className="actions">
-                  <button onClick={() => handleEdit(veiculo)} className="btn-edit">Editar</button>
-                  <button onClick={() => handleDelete(veiculo.id)} className="btn-delete">Excluir</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+        {!editingForm && (
+            <div className="table-container">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Modelo</th>
+                        <th>Ano</th>
+                        <th>Placa</th>
+                        <th>Renavam</th>
+                        <th>KMs Rodados</th>
+                        <th>Data Aquisição</th>
+                        <th>Ações</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {veiculos.filter((veiculo) => veiculo.deletedAt == null)
+                        .map((veiculo) => (
+                            <tr key={veiculo.id}>
+                                <td>{veiculo.id}</td>
+                                <td>{veiculo.modelo}</td>
+                                <td>{veiculo.ano}</td>
+                                <td>{veiculo.placa}</td>
+                                <td>{veiculo.renavam}</td>
+                                <td>{veiculo.kms_rodados.toLocaleString('pt-BR')}</td>
+                                <td>{new Date(veiculo.data_aquisicao).toLocaleDateString('pt-BR')}</td>
+                                <td className="actions">
+                                    <button onClick={() => handleEdit(veiculo)} className="btn-edit">Editar</button>
+                                    <button onClick={() => setDeleteId(veiculo.id)} className="btn-delete">Excluir</button>
+                                </td>
+                            </tr>
+                    ))}
+                    </tbody>
+                </table>
+            </div>
+        )}
+
+        {deleteId && (
+            <CustomConfirm
+                message="Tem certeza que deseja excluir este veiculo?"
+                onConfirm={handleDelete}
+                onCancel={() => setDeleteId(null)}
+            />
+        )}
     </div>
   );
 }

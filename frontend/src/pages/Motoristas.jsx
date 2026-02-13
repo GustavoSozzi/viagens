@@ -1,11 +1,19 @@
 import { useState, useEffect } from 'react';
+import Modal from '../components/Modals/Modal.jsx';
+import CustomConfirm from '../components/Modals/CustomConfirm.jsx';
 import api from '../services/api';
 
 function Motoristas() {
+  let Error = null;
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
   const [motoristas, setMotoristas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [errorMessage, setMessage] = useState('');
+  const [editingForm, setEditingForm] = useState(false);
+  const [errorForm, setErrorForm] = useState(false);
   const [formData, setFormData] = useState({
     nome: '',
     data_nascimento: '',
@@ -15,6 +23,15 @@ function Motoristas() {
   useEffect(() => {
     fetchMotoristas();
   }, []);
+
+  const hideForm = () => {
+      if (showForm) {
+        resetForm();
+      } else {
+        setShowForm(true);
+        setEditingForm(true);
+      }
+  };
 
   const fetchMotoristas = async () => {
     try {
@@ -38,8 +55,20 @@ function Motoristas() {
       fetchMotoristas();
       resetForm();
     } catch (error) {
-      console.error('Erro ao salvar motorista:', error);
-      alert('Erro ao salvar motorista');
+        if (error.response && error.response.data && error.response.data.errors) {
+            const errors = error.response.data.errors;
+            const ErrorField = Object.keys(errors)[0];
+            const ErrorMessage = errors[ErrorField][0];
+            setErrorForm(true)
+            setMessage(ErrorMessage);
+            setIsModalOpen(true);
+
+            console.error('Erro de validação:', ErrorMessage);
+
+        } else {
+            console.error('Erro inesperado:', error);
+            alert('Erro inesperado ao tentar salvar o motorista. Tente novamente.');
+        }
     }
   };
 
@@ -53,22 +82,26 @@ function Motoristas() {
     setShowForm(true);
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Tem certeza que deseja excluir este motorista?')) {
-      try {
-        await api.delete(`/motoristas/${id}`);
-        fetchMotoristas();
-      } catch (error) {
-        console.error('Erro ao excluir motorista:', error);
-        alert('Erro ao excluir motorista');
-      }
+  const handleDelete = async () => {
+    if (!deleteId) return;
+
+    try {
+      await api.delete(`/motoristas/${deleteId}`);
+      setMotoristas(motoristas.filter(m => m.id !== deleteId));
+      setDeleteId(null);
+    } catch (error) {
+      console.error('Erro ao excluir motorista:', error);
+      alert('Erro ao excluir motorista');
+      setDeleteId(null);
     }
   };
 
   const resetForm = () => {
     setFormData({ nome: '', data_nascimento: '', numero_cnh: '' });
     setEditingId(null);
+    setErrorForm(false);
     setShowForm(false);
+    setEditingForm(false);
   };
 
   if (loading) return <div className="loading">Carregando...</div>;
@@ -77,7 +110,7 @@ function Motoristas() {
     <div className="page">
       <div className="page-header">
         <h1>👤 Motoristas</h1>
-        <button onClick={() => setShowForm(!showForm)} className="btn-primary">
+        <button onClick={() => hideForm()} className="btn-primary">
           {showForm ? 'Cancelar' : '+ Novo Motorista'}
         </button>
       </div>
@@ -109,6 +142,7 @@ function Motoristas() {
               type="text"
               value={formData.numero_cnh}
               onChange={(e) => setFormData({ ...formData, numero_cnh: e.target.value })}
+              maxLength="11"
               required
             />
           </div>
@@ -116,38 +150,58 @@ function Motoristas() {
             <button type="submit" className="btn-primary">Salvar</button>
             <button type="button" onClick={resetForm} className="btn-secondary">Cancelar</button>
           </div>
+            {errorForm && (
+                <Modal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                errors={errorMessage}
+                />
+            )}
         </form>
+
       )}
 
-      <div className="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Nome</th>
-              <th>Data Nascimento</th>
-              <th>CNH</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {motoristas.map((motorista) => (
-              <tr key={motorista.id}>
-                <td>{motorista.id}</td>
-                <td>{motorista.nome}</td>
-                <td>{new Date(motorista.data_nascimento).toLocaleDateString('pt-BR')}</td>
-                <td>{motorista.numero_cnh}</td>
-                <td className="actions">
-                  <button onClick={() => handleEdit(motorista)} className="btn-edit">Editar</button>
-                  <button onClick={() => handleDelete(motorista.id)} className="btn-delete">Excluir</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+        {!editingForm && (
+            <div className="table-container">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nome</th>
+                        <th>Data Nascimento</th>
+                        <th>CNH</th>
+                        <th>Ações</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {motoristas.filter((motorista) => motorista.deletedAt == null)
+                        .map((motorista) => (
+                        <tr key={motorista.id}>
+                            <td>{motorista.id}</td>
+                            <td>{motorista.nome}</td>
+                            <td>{new Date(motorista.data_nascimento).toLocaleDateString('pt-BR')}</td>
+                            <td>{motorista.numero_cnh}</td>
+                            <td className="actions">
+                                <button onClick={() => handleEdit(motorista)} className="btn-edit">Editar</button>
+                                <button onClick={() => setDeleteId(motorista.id)} className="btn-delete">Excluir</button>
+                            </td>
+                        </tr>
+                    ))}
+                    </tbody>
+                </table>
+            </div>
+        )}
+
+        {deleteId && (
+            <CustomConfirm
+                message="Tem certeza que deseja excluir este motorista?"
+                onConfirm={handleDelete}
+                onCancel={() => setDeleteId(null)}
+            />
+        )}
+
     </div>
-  );
+  )
 }
 
 export default Motoristas;

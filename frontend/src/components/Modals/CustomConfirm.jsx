@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import style from './Modal.module.css';
 
-const ModalConfirm = ({ message, onConfirm, onCancel }) => {
+const CustomConfirm = ({ message, onConfirm, onCancel }) => {
     return (
         <div className={style.overlayStyle}>
-            <div className={style.style.modalStyle}>
+            <div className={style.modalStyle}>
                 <p>{message}</p>
                 <button onClick={onConfirm}>Sim</button>
                 <button onClick={onCancel}>Não</button>
@@ -13,4 +13,4 @@ const ModalConfirm = ({ message, onConfirm, onCancel }) => {
     );
 };
 
-export default ModalConfirm;
+export default CustomConfirm;

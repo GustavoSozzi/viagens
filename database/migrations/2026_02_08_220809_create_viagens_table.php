@@ -19,14 +19,15 @@ return new class extends Migration
             $table->dateTime('data_hora_inicial');
             $table->dateTime('data_hora_final')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
 
-        // Tabela pivot para relacionamento N:N entre Viagens e Motoristas
         Schema::create('motorista_viagem', function (Blueprint $table) {
             $table->id();
             $table->foreignId('viagem_id')->constrained('viagens')->onDelete('cascade');
             $table->foreignId('motorista_id')->constrained('motoristas')->onDelete('cascade');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

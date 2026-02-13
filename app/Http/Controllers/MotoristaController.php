@@ -18,11 +18,11 @@ class MotoristaController extends Controller
     public function index(Request $request)
     {
         $currentPage = $request->get('current_page') ?? 1;
-        $regsPerPage = 3;
+        $regsPerPage = 10;
 
         $skip = ($currentPage - 1) * $regsPerPage; // 1 = 0 -- 2 = 3
 
-        $motoristas = Motoristas::skip($skip)->take($regsPerPage)->orderByDesc('id')->get();
+        $motoristas = Motoristas::withTrashed()->skip($skip)->take($regsPerPage)->orderByDesc('id')->get();
 
         return MotoristaResource::collection($motoristas);
     }
