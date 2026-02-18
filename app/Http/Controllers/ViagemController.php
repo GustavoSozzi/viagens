@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreViagemRequest;
 use App\Http\Requests\UpdateViagemRequest;
 use App\Http\Resources\ViagemResource;
+use App\Jobs\DeleteViagensJob;
 use App\Models\Viagens;
 use Exception;
 use Illuminate\Http\Request;
@@ -113,11 +114,7 @@ class ViagemController extends Controller
     public function destroy(string $id)
     {
         try {
-            $removed = Viagens::destroy($id);
-            if (!$removed) {
-                throw new Exception();
-            }
-
+            DeleteViagensJob::dispatch($id)->delay(now()->plus(seconds: 5))->onQueue('deleteTrips');
             return response()->json(null, 204);
         } catch (\Exception) {
             return response()->json([
