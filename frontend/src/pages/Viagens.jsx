@@ -7,6 +7,7 @@ function Viagens() {
   const [motoristas, setMotoristas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [editingForm, setEditingForm] = useState(false)
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({
     veiculo_id: '',
@@ -38,15 +39,24 @@ function Viagens() {
     }
   };
 
+  const hideForm = () => {
+      if (showForm) {
+        resetForm();
+      } else {
+        setShowForm(true);
+        setEditingForm(true);
+      }
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Validar se pelo menos um motorista foi selecionado
     if (formData.motorista_ids.length === 0) {
       alert('Selecione pelo menos um motorista para a viagem');
       return;
     }
-    
+
     try {
       const payload = {
         veiculo_id: formData.veiculo_id,
@@ -56,7 +66,7 @@ function Viagens() {
         data_hora_final: formData.data_hora_final || null,
         motoristas: formData.motorista_ids
       };
-      
+
       if (editingId) {
         await api.put(`/viagens/${editingId}`, payload);
       } else {
@@ -66,7 +76,7 @@ function Viagens() {
       resetForm();
     } catch (error) {
       console.error('Erro ao salvar viagem:', error);
-      const errorMsg = error.response?.data?.errors 
+      const errorMsg = error.response?.data?.errors
         ? Object.values(error.response.data.errors).flat().join('\n')
         : error.response?.data?.message || 'Erro ao salvar viagem';
       alert(errorMsg);
@@ -84,10 +94,10 @@ function Viagens() {
     });
     setEditingId(viagem.id);
     setShowForm(true);
+    setEditingForm(true);
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Tem certeza que deseja excluir esta viagem?')) {
       try {
         await api.delete(`/viagens/${id}`);
         fetchData();
@@ -96,7 +106,6 @@ function Viagens() {
         alert('Erro ao excluir viagem');
       }
     }
-  };
 
   const handleMotoristaToggle = (motoristaId) => {
     setFormData(prev => ({
@@ -114,10 +123,11 @@ function Viagens() {
       km_final: '',
       data_hora_inicial: '',
       data_hora_final: '',
-      motorista_ids: []
+      motorista_ids: [],
     });
     setEditingId(null);
     setShowForm(false);
+    setEditingForm(false);
   };
 
   const getVeiculoNome = (id) => {
@@ -152,7 +162,7 @@ function Viagens() {
     <div className="page">
       <div className="page-header">
         <h1>📍 Viagens</h1>
-        <button onClick={() => setShowForm(!showForm)} className="btn-primary">
+        <button onClick={() => hideForm()} className="btn-primary">
           {showForm ? 'Cancelar' : '+ Nova Viagem'}
         </button>
       </div>
@@ -177,10 +187,11 @@ function Viagens() {
         </div>
       </div>
 
+
       {showForm && (
         <form onSubmit={handleSubmit} className="form-card">
           <h2>{editingId ? 'Editar Viagem' : 'Nova Viagem'}</h2>
-          
+
           <div className="form-group">
             <label>Veículo:</label>
             <select
@@ -262,49 +273,51 @@ function Viagens() {
         </form>
       )}
 
-      <div className="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Veículo</th>
-              <th>Motoristas</th>
-              <th>Distância</th>
-              <th>Duração</th>
-              <th>Início</th>
-              <th>Fim</th>
-              <th>Status</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {viagens.map((viagem) => (
-              <tr key={viagem.id}>
-                <td><strong>#{viagem.id}</strong></td>
-                <td>{getVeiculoNome(viagem.veiculo_id)}</td>
-                <td>
-                  {viagem.motoristas.map(m => (
-                    <span key={m.id} className="badge badge-primary">{m.nome}</span>
-                  ))}
-                </td>
-                <td><strong>{calcularDistancia(viagem.km_inicial, viagem.km_final)}</strong></td>
-                <td>{calcularDuracao(viagem.data_hora_inicial, viagem.data_hora_final)}</td>
-                <td>{new Date(viagem.data_hora_inicial).toLocaleString('pt-BR')}</td>
-                <td>{viagem.data_hora_final ? new Date(viagem.data_hora_final).toLocaleString('pt-BR') : '-'}</td>
-                <td>
-                  <span className={`status ${viagem.km_final ? 'finalizada' : 'andamento'}`}>
-                    {viagem.km_final ? '✓ Finalizada' : '⏱ Em Andamento'}
-                  </span>
-                </td>
-                <td className="actions">
-                  <button onClick={() => handleEdit(viagem)} className="btn-edit">Editar</button>
-                  <button onClick={() => handleDelete(viagem.id)} className="btn-delete">Excluir</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+        {!editingForm && (
+            <div className="table-container">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Veículo</th>
+                        <th>Motoristas</th>
+                        <th>Distância</th>
+                        <th>Duração</th>
+                        <th>Início</th>
+                        <th>Fim</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {viagens.map((viagem) => (
+                        <tr key={viagem.id}>
+                            <td><strong>#{viagem.id}</strong></td>
+                            <td>{getVeiculoNome(viagem.veiculo_id)}</td>
+                            <td>
+                                {viagem.motoristas.map(m => (
+                                    <span key={m.id} className="badge badge-primary">{m.nome}</span>
+                                ))}
+                            </td>
+                            <td><strong>{calcularDistancia(viagem.km_inicial, viagem.km_final)}</strong></td>
+                            <td>{calcularDuracao(viagem.data_hora_inicial, viagem.data_hora_final)}</td>
+                            <td>{new Date(viagem.data_hora_inicial).toLocaleString('pt-BR')}</td>
+                            <td>{viagem.data_hora_final ? new Date(viagem.data_hora_final).toLocaleString('pt-BR') : '-'}</td>
+                            <td>
+                            <span className={`status ${viagem.km_final ? 'finalizada' : 'andamento'}`}>
+                            {viagem.km_final ? '✓ Finalizada' : '⏱ Em Andamento'}
+                            </span>
+                            </td>
+                            <td className="actions">
+                                <button onClick={() => handleEdit(viagem)} className="btn-edit">Editar</button>
+                                <button onClick={() => handleDelete(viagem.id)} className="btn-delete">Excluir</button>
+                            </td>
+                        </tr>
+                    ))}
+                    </tbody>
+                </table>
+            </div>
+        )}
     </div>
   );
 }

@@ -19,6 +19,7 @@ class MotoristaResource extends JsonResource
             'nome' => $this->nome,
             'data_nascimento' => $this->data_nascimento,
             'numero_cnh' => $this->numero_cnh,
+            'deletedAt' => $this->deleted_at,
         ];
     }
 }

@@ -12,7 +12,6 @@ class ViagemResource extends JsonResource
         return [
             'id' => $this->id,
             'veiculo_id' => $this->veiculo_id,
-            'veiculo' => new VeiculoResource($this->whenLoaded('veiculo')),
             'motoristas' => MotoristaResource::collection($this->whenLoaded('motoristas')),
             'km_inicial' => $this->km_inicial,
             'km_final' => $this->km_final,

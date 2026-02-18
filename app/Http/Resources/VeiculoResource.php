@@ -22,6 +22,7 @@ class VeiculoResource extends JsonResource
             'kms_rodados' => $this->kms_rodados,
             'renavam' => $this->renavam,
             'placa' => $this->placa,
+            'deletedAt' => $this->deleted_at,
         ];
     }
 }

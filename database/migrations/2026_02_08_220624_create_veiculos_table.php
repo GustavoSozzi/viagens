@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('renavam')->unique();
             $table->string('placa')->unique();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
