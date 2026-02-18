@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreMotoristaRequest;
 use App\Http\Requests\UpdateMotoristaRequest;
 use App\Http\Resources\MotoristaResource;
+use App\Jobs\DeleteMotoristasJob;
 use App\Models\Motoristas;
 use Exception;
 use Illuminate\Http\Request;
@@ -89,11 +90,7 @@ class MotoristaController extends Controller
     public function destroy(string $id)
     {
         try{
-            $removed = Motoristas::destroy($id);
-            if (!$removed){
-                throw new Exception();
-            }
-
+            DeleteMotoristasJob::dispatch($id)->delay(now()->plus(seconds: 5))->onQueue('deleteMotoristas');
             return response()->json(null, 204);
         } catch(\Exception){
             return response()->json([

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreVeiculoRequest;
 use App\Http\Requests\UpdateVeiculoRequest;
 use App\Http\Resources\VeiculoResource;
+use App\Jobs\DeleteVeiculosJob;
 use App\Models\Veiculos;
 use Exception;
 use Illuminate\Http\Request;
@@ -74,7 +75,6 @@ class VeiculoController extends Controller
         try{
             $veiculo = Veiculos::findOrFail($id);
             $veiculo->update($data);
-
             return response()->json($veiculo, 200);
         } catch(\Exception $ex){
             return response()->json([
@@ -89,11 +89,7 @@ class VeiculoController extends Controller
     public function destroy(string $id)
     {
         try{
-            $removed =  Veiculos::destroy($id);
-            if (!$removed){
-                throw new Exception();
-            }
-
+            DeleteVeiculosJob::dispatch($id)->delay(now()->plus(seconds: 5))->onQueue('deleteVeiculos');
             return response()->json(null, 204);
         } catch(\Exception){
             return response()->json([

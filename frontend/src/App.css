@@ -190,6 +190,11 @@ body {
   transform: translateY(-2px);
 }
 
+.btn-delete:disabled{
+    background-color: #DCDCDC;
+    color: #808080;
+}
+
 /* Form */
 .form-card {
   background: linear-gradient(135deg, #f6f8fb 0%, #f0f4f8 100%);

@@ -5,6 +5,8 @@ import api from '../services/api';
 function Veiculos() {
   const [veiculos, setVeiculos] = useState([]);
   const [deleteId, setDeleteId] = useState(null);
+  const [carregando, setCarregando]= useState(false);
+  const [loadingIds, setLoadingIds] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -74,16 +76,23 @@ function Veiculos() {
   const handleDelete = async () => {
       if (!deleteId) console.log("error");
 
+      const idExclui = deleteId;
+      setDeleteId(idExclui);
+      setLoadingIds(idExclui);
+      setDeleteId(null);
       try {
           await api.delete(`/veiculos/${deleteId}`);
+          await new Promise(resolve => setTimeout(resolve, 5000))
           setVeiculos(veiculos.filter(v => v.id !== deleteId));
-          setDeleteId(null);
       } catch (error) {
           console.error('Erro ao excluir veiculo:', error);
           alert('Erro ao excluir veiculo');
           setDeleteId(null);
-      }
-  };
+      } finally {
+          setLoadingIds(null)
+        }
+
+  }
 
   const resetForm = () => {
     setFormData({ modelo: '', ano: '', data_aquisicao: '', kms_rodados: '', renavam: '', placa: '' });
@@ -201,7 +210,7 @@ function Veiculos() {
                                 <td>{new Date(veiculo.data_aquisicao).toLocaleDateString('pt-BR')}</td>
                                 <td className="actions">
                                     <button onClick={() => handleEdit(veiculo)} className="btn-edit">Editar</button>
-                                    <button onClick={() => setDeleteId(veiculo.id)} className="btn-delete">Excluir</button>
+                                    <button key={veiculo.id} onClick={() => setDeleteId(veiculo.id)} disabled={loadingIds === veiculo.id} className="btn-delete">{loadingIds === veiculo.id ? 'Excluindo...' : 'Excluir'}</button>
                                 </td>
                             </tr>
                     ))}
