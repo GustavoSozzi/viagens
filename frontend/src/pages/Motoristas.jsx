@@ -9,6 +9,7 @@ function Motoristas() {
   const [deleteId, setDeleteId] = useState(null);
   const [motoristas, setMotoristas] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingIds, setLoadingIds] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [errorMessage, setMessage] = useState('');
@@ -85,10 +86,14 @@ function Motoristas() {
   const handleDelete = async () => {
     if (!deleteId) return;
 
+    const idExclui = deleteId;
+    setDeleteId(idExclui);
+    setLoadingIds(idExclui);
+    setDeleteId(null);
     try {
       await api.delete(`/motoristas/${deleteId}`);
+      await new Promise(resolve => setTimeout(resolve, 5000));
       setMotoristas(motoristas.filter(m => m.id !== deleteId));
-      setDeleteId(null);
     } catch (error) {
       console.error('Erro ao excluir motorista:', error);
       alert('Erro ao excluir motorista');
@@ -183,7 +188,7 @@ function Motoristas() {
                             <td>{motorista.numero_cnh}</td>
                             <td className="actions">
                                 <button onClick={() => handleEdit(motorista)} className="btn-edit">Editar</button>
-                                <button onClick={() => setDeleteId(motorista.id)} className="btn-delete">Excluir</button>
+                                <button key={motorista.id} onClick={() => setDeleteId(motorista.id)} disabled={loadingIds === motorista.id} className="btn-delete">{loadingIds === motorista.id ? 'Excluindo...' : 'Excluir'}</button>
                             </td>
                         </tr>
                     ))}

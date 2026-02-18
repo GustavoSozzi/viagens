@@ -1,12 +1,16 @@
 import { useState, useEffect } from 'react';
 import api from '../services/api';
+import CustomConfirm from "../components/Modals/CustomConfirm.jsx";
 
 function Viagens() {
   const [viagens, setViagens] = useState([]);
   const [veiculos, setVeiculos] = useState([]);
+  const [loadingIds, setLoadingIds] = useState(null);
+  const [deleteId, setDeleteId] = useState(null);
   const [motoristas, setMotoristas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [carregando, setCarregando] = useState(true);
   const [editingForm, setEditingForm] = useState(false)
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({
@@ -20,7 +24,7 @@ function Viagens() {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [carregando]);
 
   const fetchData = async () => {
     try {
@@ -33,6 +37,7 @@ function Viagens() {
       setVeiculos(veiculosRes.data.data);
       setMotoristas(motoristasRes.data.data);
       setLoading(false);
+      setCarregando(false);
     } catch (error) {
       console.error('Erro ao buscar dados:', error);
       setLoading(false);
@@ -98,12 +103,25 @@ function Viagens() {
   };
 
   const handleDelete = async (id) => {
+      setDeleteId(id);
+      if (!deleteId) console.log("error");
+
+      const idExclui = deleteId;
+      setDeleteId(idExclui);
+      setLoadingIds(idExclui);
+      setDeleteId(null);
+
+      console.log('viagem excluida: ' + deleteId);
       try {
-        await api.delete(`/viagens/${id}`);
-        fetchData();
+        await api.delete(`/viagens/${deleteId}`);
+        await new Promise(resolve => setTimeout(resolve, 5000));
+        setViagens(viagens.filter(v => v.id !== deleteId));
       } catch (error) {
         console.error('Erro ao excluir viagem:', error);
         alert('Erro ao excluir viagem');
+      } finally {
+          setLoadingIds(null);
+          setCarregando(false);
       }
     }
 
@@ -310,13 +328,21 @@ function Viagens() {
                             </td>
                             <td className="actions">
                                 <button onClick={() => handleEdit(viagem)} className="btn-edit">Editar</button>
-                                <button onClick={() => handleDelete(viagem.id)} className="btn-delete">Excluir</button>
+                                <button onClick={() => setDeleteId(viagem.id)} disabled={loadingIds === viagem.id} className="btn-delete">{loadingIds === viagem.id ? 'Excluindo...' : 'Excluir'}</button>
                             </td>
                         </tr>
                     ))}
                     </tbody>
                 </table>
             </div>
+        )}
+
+        {deleteId && (
+            <CustomConfirm
+                message="Tem certeza que deseja excluir esta viagem?"
+                onConfirm={handleDelete}
+                onCancel={() => setDeleteId(null)}
+            />
         )}
     </div>
   );
