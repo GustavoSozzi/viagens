@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '../services/api';
 import CustomConfirm from "../components/Modals/CustomConfirm.jsx";
+import Echo from "laravel-echo";
 
 function Viagens() {
   const [viagens, setViagens] = useState([]);
@@ -111,9 +112,12 @@ function Viagens() {
       setLoadingIds(idExclui);
       setDeleteId(null);
 
+      console.log('viagem excluida: ' + deleteId);
       try {
-          Echo.channel(`trips.delete.finished`)
-              .listen('')
+          window.Echo.private(`viagens.${id}`)
+              .listen('.trip.delete.finished', () => {
+                  setLoading(false);
+              });
         await api.delete(`/viagens/${deleteId}`);
         setViagens(viagens.filter(v => v.id !== deleteId));
       } catch (error) {
