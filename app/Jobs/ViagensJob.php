@@ -22,6 +22,6 @@ class ViagensJob implements ShouldQueue
      */
     public function handle(): void
     {
-        //
+
     }
 }
