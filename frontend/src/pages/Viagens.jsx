@@ -111,10 +111,10 @@ function Viagens() {
       setLoadingIds(idExclui);
       setDeleteId(null);
 
-      console.log('viagem excluida: ' + deleteId);
       try {
+          Echo.channel(`trips.delete.finished`)
+              .listen('')
         await api.delete(`/viagens/${deleteId}`);
-        await new Promise(resolve => setTimeout(resolve, 5000));
         setViagens(viagens.filter(v => v.id !== deleteId));
       } catch (error) {
         console.error('Erro ao excluir viagem:', error);

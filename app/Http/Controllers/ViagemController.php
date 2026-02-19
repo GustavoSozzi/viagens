@@ -115,7 +115,7 @@ class ViagemController extends Controller
     {
         try {
             DeleteViagensJob::dispatch($id)->delay(now()->plus(seconds: 5))->onQueue('deleteTrips');
-            return response()->json(null, 204);
+            return response()->json(['status' => 'processing']);
         } catch (\Exception) {
             return response()->json([
                 'message' => 'Falha ao remover viagem'
