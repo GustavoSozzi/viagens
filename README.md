@@ -2,6 +2,8 @@
 
 Sistema para gerenciar motoristas, veículos e viagens com Laravel + React.
 
+## 🚀 Como Rodar
+
 ### Backend
 ```bash
 composer install
@@ -11,7 +13,16 @@ docker-compose up -d
 php artisan migrate --seed
 php artisan serve
 ```
-API: http://localhost:8000
+
+### Queue Worker (obrigatório)
+```bash
+php artisan queue:work --queue=deleteTrips,default
+```
+
+### Reverb WebSocket (obrigatório)
+```bash
+php artisan reverb:start
+```
 
 ### Frontend
 ```bash
@@ -19,24 +30,6 @@ cd frontend
 npm install
 npm run dev
 ```
-App: http://localhost:5173
 
-## 🗄️ Banco de Dados
-
-**Comandos úteis:**
-```bash
-docker-compose logs postgres          # Ver logs
-docker-compose down                   # Parar container
-php artisan migrate:fresh --seed      # Resetar banco
-```
-
-## 📋 Endpoints
-
-- `/api/motoristas` - CRUD de motoristas
-- `/api/veiculos` - CRUD de veículos
-- `/api/viagens` - CRUD de viagens
-
-## 🛠️ Stack
-
-**Backend:** Laravel 11, PostgreSQL 14, Docker  
-**Frontend:** React 19, Vite, Axios, React Router
+## �️ Stack
+Laravel 11, PostgreSQL 14, React 19, Reverb WebSocket

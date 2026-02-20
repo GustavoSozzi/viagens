@@ -29,7 +29,9 @@ class ViagensObserver
      */
     public function deleted(Viagens $viagens): void
     {
-        ProcessarViagemDeletada::dispatch($viagens);
+        \Log::info('Observer: Viagem deletada', ['id' => $viagens->id]);
+        event(new DeleteTripsProcessed($viagens->id));
+        \Log::info('Observer: Evento disparado', ['id' => $viagens->id]);
     }
 
     /**

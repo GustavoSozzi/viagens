@@ -20,6 +20,7 @@ class ProcessarViagemDeletada
      */
     public function handle(DeleteTripsProcessed $event): void
     {
-        ViagensJob::dispatch($event->viagens)->onQueue('jobs');
+        // O evento já foi disparado, não precisa fazer nada aqui
+        // O broadcast já foi feito automaticamente
     }
 }

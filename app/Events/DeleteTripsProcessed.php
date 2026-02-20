@@ -27,7 +27,7 @@ class DeleteTripsProcessed implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('viagens.' .$this->id),
+            new \Illuminate\Broadcasting\Channel('viagens.' .$this->id),
         ];
     }
 
