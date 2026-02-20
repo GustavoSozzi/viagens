@@ -2,12 +2,15 @@
 
 namespace App\Events;
 
+use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Broadcasting\PresenceChannel;
+use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class DeleteTripsProcessed implements ShouldBroadcast
+class DeleteVehicleProcessed implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -15,8 +18,9 @@ class DeleteTripsProcessed implements ShouldBroadcast
      * Create a new event instance.
      */
     public function __construct(
-        public string $id,
+        public string $id
     ) {}
+
 
     /**
      * Get the channels the event should broadcast on.
@@ -26,12 +30,12 @@ class DeleteTripsProcessed implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new \Illuminate\Broadcasting\Channel('viagens.' .$this->id),
+            new \Illuminate\Broadcasting\Channel('veiculos.' .$this->id),
         ];
     }
 
     public function broadcastAs(): string
     {
-        return 'trip.delete.finished';
+        return 'vehicle.delete.finished';
     }
 }

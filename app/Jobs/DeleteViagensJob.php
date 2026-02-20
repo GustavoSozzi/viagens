@@ -24,7 +24,6 @@ class DeleteViagensJob implements ShouldQueue
     public function handle(): void
     {
         $viagem = Viagens::find($this->id);
-        if($viagem) $viagem->delete();
-        event(new DeleteTripsProcessed($this->id));
+        if($viagem) $viagem->delete(); //dispara o observer
     }
 }

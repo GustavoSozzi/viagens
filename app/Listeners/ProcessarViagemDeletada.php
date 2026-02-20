@@ -20,6 +20,6 @@ class ProcessarViagemDeletada
      */
     public function handle(DeleteTripsProcessed $event): void
     {
-        ViagensJob::dispatch($event->viagens)->onQueue('jobs');
+        //inutilizado
     }
 }

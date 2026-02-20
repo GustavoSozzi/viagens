@@ -3,7 +3,6 @@
 namespace App\Observers;
 
 use App\Events\DeleteTripsProcessed;
-use App\Listeners\ProcessarViagemDeletada;
 use App\Models\Viagens;
 
 class ViagensObserver
@@ -29,7 +28,7 @@ class ViagensObserver
      */
     public function deleted(Viagens $viagens): void
     {
-        ProcessarViagemDeletada::dispatch($viagens);
+        event(new DeleteTripsProcessed($viagens->id));
     }
 
     /**
